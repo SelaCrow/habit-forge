@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+*.pbxuser
+xcuserdata/
+DerivedData/
+
+# Firebase
+GoogleService-Info.plist
+
+# CocoaPods
+Pods/
+Podfile.lock
