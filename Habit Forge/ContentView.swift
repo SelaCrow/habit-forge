@@ -1,41 +1,71 @@
-//
-//  ContentView.swift
-//  Habit Forge
-//
-//  Created by Marisela Gomez on 7/21/25.
-//
-
 import SwiftUI
-import FirebaseAuth
 
 struct ContentView: View {
-    @StateObject private var authVM = AuthViewModel()
+    // Initialize the AuthViewModel and observe its published properties
+    @StateObject private var authViewModel = AuthViewModel()
+    
+    // Controls whether the sign-up form is visible
+    @State private var showSignUpForm = false
+
     var body: some View {
-        VStack(spacing: 20){
-            if let user = authVM.user{
+        VStack(spacing: 20) {
+            
+            // If the user is logged in, show welcome message and sign out button
+            if let user = authViewModel.userSession {
                 Text("Welcome, Adventurer!")
                     .font(.title)
-                Text("Your UID: \(user.uid.prefix(6))...")
+                Text("Your UID: \(user.uid.prefix(6))...")  // Show part of UID
                     .font(.subheadline)
-                Button("Sign Out"){
-                    authVM.signOut()
+                Button("Sign Out") {
+                    authViewModel.signOut()
                 }
                 .padding()
-            }
-            else {
-                if authVM.isLoading{
+            } else {
+                // User is not logged in
+                
+                if authViewModel.isLoading {
+                    // Show a progress spinner while loading
                     ProgressView()
-                }
-                else {
-                    Button("Start as Guest"){
-                        authVM.signInAnonymously()
+                } else {
+                    // Show a button to toggle the sign-up form
+                    Button(showSignUpForm ? "Cancel Sign Up" : "Sign Up") {
+                        withAnimation {
+                            showSignUpForm.toggle()  // Show or hide the SignUpView
+                            if !showSignUpForm {
+                                authViewModel.errorMessage = nil
+                            }
+                        }
                     }
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(8)
+                    
+                    // If toggled, show the SignUpView and pass the authViewModel environment object
+                    if showSignUpForm {
+                        SignUpView()
+                            .environmentObject(authViewModel)
+                            .transition(.slide)  // Animate form appearing/disappearing
+                    }
+                    
+                    // Always show a button for anonymous guest login
+                    Button("Start as Guest") {
+                        authViewModel.signInAnonymously()
+                    }
+                    .padding()
+                    .background(Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
                 }
-            }        }
+                
+                // Show any authentication error messages below the buttons
+                if let error = authViewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                }
+            }
+        }
         .padding()
     }
 }

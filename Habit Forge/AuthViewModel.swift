@@ -1,67 +1,126 @@
-//
-//  AuthViewModel.swift
-//  Habit Forge
-//
-//  Created by Marisela Gomez on 7/21/25.
-//
-
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
 
-class AuthViewModel: ObservableObject{
-    @Published var user: User?
-    @Published var isLoading = false
-    
-    private let db = Firestore.firestore()
-    
-    init(){
-        self.user = Auth.auth().currentUser
+class AuthViewModel: ObservableObject {
+    @Published var userSession: FirebaseAuth.User?  // Current Firebase user session
+    @Published var isLoggedIn = false                // Login state flag
+    @Published var errorMessage: String?             // For error messages to show in UI
+    @Published var isLoading = false                  // Shows loading indicator during async tasks
+
+    private var db = Firestore.firestore()           // Firestore database reference
+
+    init() {
+        // Initialize user session and login status on startup
+        self.userSession = Auth.auth().currentUser
+        self.isLoggedIn = userSession != nil
     }
-    func signInAnonymously(){
+
+    // MARK: - Sign Up with username, email, password
+    func signUp(username: String, email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         isLoading = true
-        Auth.auth().signInAnonymously{[weak self] authResult, error in
-            DispatchQueue.main.async{
-                self?.isLoading = false
+        
+        // Check if username already exists in Firestore
+        db.collection("users").whereField("username", isEqualTo: username).getDocuments { snapshot, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+            
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.errorMessage = "Error checking username: \(error.localizedDescription)"
+                    completion(.failure(error))
+                }
+                return
+            }
+
+            if let snapshot = snapshot, !snapshot.isEmpty {
+                let usernameTakenError = NSError(domain: "", code: 409, userInfo: [NSLocalizedDescriptionKey: "Username already taken."])
+                DispatchQueue.main.async {
+                    self.errorMessage = "Username already taken."
+                    completion(.failure(usernameTakenError))
+                }
+                return
+            }
+
+            // Username is unique, create Firebase Authentication user
+            Auth.auth().createUser(withEmail: email, password: password) { result, error in
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                }
+                
                 if let error = error {
-                    print("Anon login error")
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Sign-up failed: \(error.localizedDescription)"
+                        completion(.failure(error))
+                    }
                     return
                 }
-                guard let user = authResult?.user else {return}
-                self?.user = user
-                self?.createUserProfileIfNeeded(userID: user.uid)
-                
-            }
-        }
-    }
-    private func createUserProfileIfNeeded(userID: String){
-        let userRef = db.collection("users").document(userID)
-        userRef.getDocument{ document, error in
-            if let document = document, document.exists {
-                print("User profile already exists.")
-            } else {
-                userRef.setData([
-                    "xp":0,
-                    "level":1,
-                    "class":"Unassigned",
-                    "createdAt": FieldValue.serverTimestamp()
-                ]) { error in
-                    if let error = error{
-                        print("error creating profile")
-                    } else {
-                        print("User profile created!")
+
+                guard let user = result?.user else {
+                    let unknownError = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error during user creation."])
+                    DispatchQueue.main.async {
+                        completion(.failure(unknownError))
                     }
-                    
+                    return
+                }
+
+                // Update user session and login state on main thread
+                DispatchQueue.main.async {
+                    self.userSession = user
+                    self.isLoggedIn = true
+                }
+
+                // Save user profile data to Firestore
+                let userData: [String: Any] = [
+                    "uid": user.uid,
+                    "email": email,
+                    "username": username
+                ]
+
+                self.db.collection("users").document(user.uid).setData(userData) { error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            self.errorMessage = "Failed to save user data: \(error.localizedDescription)"
+                            completion(.failure(error))
+                        } else {
+                            self.errorMessage = nil
+                            completion(.success(()))
+                        }
+                    }
                 }
             }
         }
     }
-    func signOut(){
-        do{
+
+    // MARK: - Anonymous Sign In
+    func signInAnonymously() {
+        isLoading = true
+        Auth.auth().signInAnonymously { [weak self] result, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                if let error = error {
+                    self?.errorMessage = error.localizedDescription
+                    return
+                }
+                self?.userSession = result?.user
+                self?.isLoggedIn = true
+            }
+        }
+    }
+
+    // MARK: - Sign Out
+    func signOut() {
+        do {
             try Auth.auth().signOut()
-            self.user = nil
+            DispatchQueue.main.async {
+                self.userSession = nil
+                self.isLoggedIn = false
+            }
         } catch {
-            print("Sign out error")
+            DispatchQueue.main.async {
+                self.errorMessage = "Sign out failed: \(error.localizedDescription)"
+            }
         }
     }
 }
