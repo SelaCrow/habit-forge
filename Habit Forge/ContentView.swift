@@ -6,6 +6,7 @@ struct ContentView: View {
     
     // Controls whether the sign-up form is visible
     @State private var showSignUpForm = false
+    @State private var showLoginForm = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -41,6 +42,25 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(8)
                     
+                  
+                    Button(showLoginForm ? "Cancel Login":"Login"){
+                        withAnimation{
+                            showLoginForm.toggle()
+                            if !showLoginForm{
+                                authViewModel.errorMessage = nil
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.green)
+                    .foregroundStyle(Color.white)
+                    .cornerRadius(8)
+                    
+                    if showLoginForm{
+                        LoginView()
+                            .environmentObject(authViewModel)
+                            .transition(.slide)
+                    }
                     // If toggled, show the SignUpView and pass the authViewModel environment object
                     if showSignUpForm {
                         SignUpView()

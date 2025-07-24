@@ -108,7 +108,67 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
+// MARK: - Log in
+    func login(identifier: String, password: String, completion: @escaping(Result<Void,Error>) -> Void) {
+        isLoading = true
 
+        func signIn(with email: String) {
+            Auth.auth().signIn(withEmail: email, password: password) { result, error in
+                DispatchQueue.main.async {
+                    self.isLoading = false
+
+                    if let error = error {
+                        self.errorMessage = "Login failed: \(error.localizedDescription)"
+                        completion(.failure(error))
+                        return
+                    }
+
+                    guard let user = result?.user else {
+                        let unknownError = NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error during login"])
+                        self.errorMessage = "Unknown error during login."
+                        completion(.failure(unknownError))
+                        return
+                    }
+
+                    self.userSession = user
+                    self.isLoggedIn = true
+                    self.errorMessage = nil
+                    completion(.success(()))
+                }
+            }
+        }
+
+        // Check if input is email or username
+        if identifier.contains("@") {
+            // assume email
+            signIn(with: identifier)
+        } else {
+            // assume username
+            db.collection("users").whereField("username", isEqualTo: identifier).getDocuments { snapshot, error in
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.errorMessage = "Failed to find username: \(error.localizedDescription)"
+                        completion(.failure(error))
+                    }
+                    return
+                }
+
+                guard let document = snapshot?.documents.first,
+                      let email = document.data()["email"] as? String else {
+                    DispatchQueue.main.async {
+                        self.isLoading = false
+                        self.errorMessage = "Username not found."
+                        completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "Username not found."])))
+                    }
+                    return
+                }
+
+                signIn(with: email)
+            }
+        }
+    }
+    
     // MARK: - Sign Out
     func signOut() {
         do {
