@@ -1,95 +1,213 @@
 import SwiftUI
 
 struct ContentView: View {
-    // Initialize the AuthViewModel and observe its published properties
     @StateObject private var authViewModel = AuthViewModel()
-    
-    // Controls whether the sign-up form is visible
+
     @State private var showSignUpForm = false
     @State private var showLoginForm = false
+    @State private var showMainContent = false
+    @State private var showSplash = true
 
     var body: some View {
-        VStack(spacing: 20) {
-            
-            // If the user is logged in, show welcome message and sign out button
-            if let user = authViewModel.userSession {
-                Text("Welcome, Adventurer!")
-                    .font(.title)
-                Text("Your UID: \(user.uid.prefix(6))...")  // Show part of UID
-                    .font(.subheadline)
-                Button("Sign Out") {
-                    authViewModel.signOut()
-                }
+        ZStack {
+            // Background
+            Image("main_background")
+                .resizable()
+                .interpolation(.none)
+                .ignoresSafeArea()
+            if showSplash || authViewModel.isLoading {
+                SplashScreenView()
+                    .zIndex(10)
+            }
+
+            // Initial app splash screen
+//            if showSplash {
+//                SplashScreenView()
+//                    .zIndex(10)
+//            }
+
+            // Main content
+            currentMainView()
                 .padding()
-            } else {
-                // User is not logged in
-                
-                if authViewModel.isLoading {
-                    // Show a progress spinner while loading
-                    ProgressView()
-                } else {
-                    // Show a button to toggle the sign-up form
-                    Button(showSignUpForm ? "Cancel Sign Up" : "Sign Up") {
-                        withAnimation {
-                            showSignUpForm.toggle()  // Show or hide the SignUpView
-                            if !showSignUpForm {
-                                authViewModel.errorMessage = nil
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(Color.blue)
+
+            // Error message banner
+            if let error = authViewModel.errorMessage {
+                Text(error)
                     .foregroundColor(.white)
-                    .cornerRadius(8)
-                    
-                  
-                    Button(showLoginForm ? "Cancel Login":"Login"){
-                        withAnimation{
-                            showLoginForm.toggle()
-                            if !showLoginForm{
-                                authViewModel.errorMessage = nil
-                            }
-                        }
-                    }
                     .padding()
-                    .background(Color.green)
-                    .foregroundStyle(Color.white)
+                    .background(Color.red)
                     .cornerRadius(8)
-                    
-                    if showLoginForm{
-                        LoginView()
-                            .environmentObject(authViewModel)
-                            .transition(.slide)
+                    .padding(.horizontal)
+                    .transition(.move(edge: .top))
+                    .zIndex(20)
+            }
+        }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                if !authViewModel.isLoading {
+                    withAnimation {
+                        showSplash = false
+                        showMainContent = true
                     }
-                    // If toggled, show the SignUpView and pass the authViewModel environment object
-                    if showSignUpForm {
-                        SignUpView()
-                            .environmentObject(authViewModel)
-                            .transition(.slide)  // Animate form appearing/disappearing
-                    }
-                    
-                    // Always show a button for anonymous guest login
-                    Button("Start as Guest") {
-                        authViewModel.signInAnonymously()
-                    }
-                    .padding()
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                }
-                
-                // Show any authentication error messages below the buttons
-                if let error = authViewModel.errorMessage {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .padding()
                 }
             }
         }
-        .padding()
+        .onChange(of: authViewModel.userSession) { _, newValue in
+            if newValue == nil {
+                showLoginForm = false
+                showSignUpForm = false
+            } else {
+                showSplash = true
+            }
+        }
+        .onChange(of: authViewModel.finishedLoadingProfile) { _, finished in
+                    if finished && authViewModel.isLoggedIn {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            withAnimation {
+                                showSplash = false
+                                showMainContent = true
+                            }
+                }
+            }
+        }
+        .onChange(of: authViewModel.isLoading) { _, loading in
+            if loading {
+                showSplash = true
+            }
+        }
     }
-}
 
-#Preview {
-    ContentView()
+    // MARK: - View Builder for current main view state
+    @ViewBuilder
+    private func currentMainView() -> some View {
+        if !showMainContent || authViewModel.isLoading {
+            EmptyView()
+        } else if authViewModel.userSession == nil {
+            loginSignupForm()
+        } else if authViewModel.isLoggedIn && authViewModel.finishedLoadingProfile {
+            if authViewModel.needsOnboarding {
+                if authViewModel.flavorText == nil {
+                    ZStack {
+                        Image("long-background")
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+
+                        FlavorSelectionView()
+                            .environmentObject(authViewModel)
+                    }
+                } else if authViewModel.characterClass == nil {
+                    ZStack {
+                
+                            Image("long-background")
+                                .resizable()
+                                .interpolation(.none)
+                                .scaledToFill()
+                                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                                .ignoresSafeArea()
+                        
+                        ClassSelectionView()
+                            .environmentObject(authViewModel)
+                    }
+                } else {
+                    QuestBoardView(authViewModel: authViewModel)
+                }
+            } else {
+                QuestBoardView(authViewModel: authViewModel)
+            }
+        }
+    }
+
+    // MARK: - Login / Signup form
+    private func loginSignupForm() -> some View {
+        ZStack {
+            VStack {
+                Spacer(minLength: 500)
+
+                if !showLoginForm && !showSignUpForm {
+                    VStack(spacing: -20) {
+                        Button(action: {
+                            withAnimation {
+                                showSignUpForm = true
+                                showLoginForm = false
+                                authViewModel.errorMessage = nil
+                            }
+                        }) {
+                            if authViewModel.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Image("Sign_up")
+                                    .resizable()
+                                    .interpolation(.none)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 300, height: 90)
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+
+                        Button(action: {
+                            withAnimation {
+                                showLoginForm = true
+                                showSignUpForm = false
+                                authViewModel.errorMessage = nil
+                            }
+                        }) {
+                            if authViewModel.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Image("log_in")
+                                    .resizable()
+                                    .interpolation(.none)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 300, height: 90)
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+
+                        Button(action: {
+                            authViewModel.signInAnonymously()
+                        }) {
+                            Image("start_as_guest")
+                                .resizable()
+                                .interpolation(.none)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 300, height: 90)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .padding(.top, 80)
+                }
+
+                Spacer()
+            }
+
+            if showLoginForm {
+                LoginView(onCancel: {
+                    withAnimation {
+                        showLoginForm = false
+                        authViewModel.errorMessage = nil
+                    }
+                })
+                .environmentObject(authViewModel)
+                .zIndex(5)
+            }
+
+            if showSignUpForm {
+                SignUpView(
+                    onCancel: {
+                        withAnimation {
+                            showSignUpForm = false
+                            authViewModel.errorMessage = nil
+                        }
+                    }
+                )
+                .environmentObject(authViewModel)
+                .zIndex(5)
+            }
+        }
+    }
 }

@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C369006B2E2F0DA500BEFDDB /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C369006A2E2F0DA500BEFDDB /* FirebaseAuth */; };
+		C369006D2E2F0DA500BEFDDB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C369006C2E2F0DA500BEFDDB /* FirebaseCore */; };
+		C369006F2E2F0DA500BEFDDB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C369006E2E2F0DA500BEFDDB /* FirebaseFirestore */; };
+		C36900712E2F0DA500BEFDDB /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C36900702E2F0DA500BEFDDB /* FirebaseStorage */; };
+		C3A70AFB2E36ED0600164A6E /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C369004B2E2F0A5400BEFDDB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +35,7 @@
 		C369003A2E2F0A5300BEFDDB /* Habit Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Habit Forge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C369004A2E2F0A5400BEFDDB /* Habit ForgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Habit ForgeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C36900542E2F0A5400BEFDDB /* Habit ForgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Habit ForgeUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +61,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C369006D2E2F0DA500BEFDDB /* FirebaseCore in Frameworks */,
+				C36900712E2F0DA500BEFDDB /* FirebaseStorage in Frameworks */,
+				C369006B2E2F0DA500BEFDDB /* FirebaseAuth in Frameworks */,
+				C369006F2E2F0DA500BEFDDB /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +88,7 @@
 		C36900312E2F0A5300BEFDDB = {
 			isa = PBXGroup;
 			children = (
+				C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */,
 				C369003C2E2F0A5300BEFDDB /* Habit Forge */,
 				C369004D2E2F0A5400BEFDDB /* Habit ForgeTests */,
 				C36900572E2F0A5400BEFDDB /* Habit ForgeUITests */,
@@ -112,6 +126,10 @@
 			);
 			name = "Habit Forge";
 			packageProductDependencies = (
+				C369006A2E2F0DA500BEFDDB /* FirebaseAuth */,
+				C369006C2E2F0DA500BEFDDB /* FirebaseCore */,
+				C369006E2E2F0DA500BEFDDB /* FirebaseFirestore */,
+				C36900702E2F0DA500BEFDDB /* FirebaseStorage */,
 			);
 			productName = "Habit Forge";
 			productReference = C369003A2E2F0A5300BEFDDB /* Habit Forge.app */;
@@ -195,6 +213,9 @@
 			);
 			mainGroup = C36900312E2F0A5300BEFDDB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C36900692E2F0DA500BEFDDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C369003B2E2F0A5300BEFDDB /* Products */;
 			projectDirPath = "";
@@ -212,6 +233,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3A70AFB2E36ED0600164A6E /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +293,7 @@
 /* Begin XCBuildConfiguration section */
 		C369005C2E2F0A5400BEFDDB /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -393,9 +416,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Habit Forge/Preview Content\"";
+				DEVELOPMENT_TEAM = X49WPG597Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -408,7 +433,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "sela-crow.Habit-Forge";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sela-crow.Habit-Forge";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -421,9 +446,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Habit Forge/Preview Content\"";
+				DEVELOPMENT_TEAM = X49WPG597Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -436,7 +463,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "sela-crow.Habit-Forge";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.sela-crow.Habit-Forge";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -552,6 +579,40 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C36900692E2F0DA500BEFDDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C369006A2E2F0DA500BEFDDB /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C36900692E2F0DA500BEFDDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		C369006C2E2F0DA500BEFDDB /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C36900692E2F0DA500BEFDDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		C369006E2E2F0DA500BEFDDB /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C36900692E2F0DA500BEFDDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		C36900702E2F0DA500BEFDDB /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C36900692E2F0DA500BEFDDB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C36900322E2F0A5300BEFDDB /* Project object */;
 }

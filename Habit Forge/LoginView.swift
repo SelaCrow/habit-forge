@@ -1,54 +1,76 @@
-//
-//  LoginView.swift
-//  Habit Forge
-//
-//  Created by Marisela Gomez on 7/24/25.
-//
-
 import SwiftUI
+
 struct LoginView: View {
+    @State private var identifier = ""  // Username or Email
+    @State private var password = ""
+
     @EnvironmentObject var authViewModel: AuthViewModel
-    @State private var loginInput: String = ""
-    @State private var password: String = ""
-    
-    var body: some View{
-        VStack(spacing:20){
-            Text("Log In")
-                .font(.largeTitle)
-                .bold()
-            
-            TextField("Username or email", text:$loginInput)
-                
+    var onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            TextField("Email or Username", text: $identifier)
                 .autocapitalization(.none)
-                .textFieldStyle(.roundedBorder)
-            
-            SecureField("Password",text:$password)
-                .autocapitalization(.none)
-                .textFieldStyle(.roundedBorder)
-            
-            if let errorMessage = authViewModel.errorMessage, !errorMessage.isEmpty{
-                Text(errorMessage)
-                    .foregroundStyle(Color.red)
+                .padding(.horizontal, 12)
+                .frame(width: 300, height: 70)
+                .background(Color.white)
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray))
+
+            SecureField("Password", text: $password)
+                .padding(.horizontal, 12)
+                .frame(width: 300, height: 70)
+                .background(Color.white)
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray))
+
+            if let error = authViewModel.errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
                     .multilineTextAlignment(.center)
             }
-            Button("Log In"){
-                authViewModel.login(identifier: loginInput, password: password){ result in
-                    switch result {
-                    case .success:
-                        //login sucessful
-                        break
-                        
-                    case .failure(let error):
-                        print("Login failed: \(error.localizedDescription)")
+
+            VStack(spacing: 10) {
+                Button(action: {
+                    authViewModel.isLoading = true
+                    authViewModel.login(identifier: identifier, password: password) { result in
+                        DispatchQueue.main.async {
+                            switch result {
+                            case .success:
+                                identifier = ""
+                                password = ""
+                            case .failure(let error):
+                                authViewModel.errorMessage = error.localizedDescription
+                            }
+                            authViewModel.isLoading = false
+                        }
+                    }
+                }) {
+                    if authViewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Image("log_in")
+                            .resizable()
+                            .interpolation(.none)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 300, height: 90)
+                            .opacity((identifier.isEmpty || password.isEmpty || authViewModel.isLoading) ? 0.5 : 1.0)
                     }
                 }
+                .disabled(identifier.isEmpty || password.isEmpty || authViewModel.isLoading)
+
+                Button(action: onCancel) {
+                    Image("cancel_btn")
+                        .resizable()
+                        .interpolation(.none)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 150, height: 60)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(authViewModel.isLoading)
-        
-            
         }
         .padding()
+        .frame(height: 500)
     }
-    }
-
+}

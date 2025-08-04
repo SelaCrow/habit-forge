@@ -14,3 +14,6 @@ GoogleService-Info.plist
 # CocoaPods
 Pods/
 Podfile.lock
+
+Secrets.xcconfig
+Secrets.swift
