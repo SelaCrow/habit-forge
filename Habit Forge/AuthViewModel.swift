@@ -51,16 +51,16 @@ class AuthViewModel: ObservableObject {
         self.userSession = Auth.auth().currentUser
         self.isLoggedIn = false
         self.userSession = nil
-        if self.userSession != nil {
-            self.checkOrGenerateDailyQuest()
-        }
+//        if self.userSession != nil {
+//            self.checkOrGenerateDailyQuest()
+        signOut()
+//        }
     }
     
     // MARK: - Sign Up with username, email, password
     func signUp(username: String, email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         isLoading = true
         db.collection("users").whereField("username", isEqualTo: username).getDocuments { snapshot, error in
-            DispatchQueue.main.async { self.isLoading = false }
             if let error = error {
                 DispatchQueue.main.async {
                     self.errorMessage = "Error checking username: \(error.localizedDescription)"
@@ -78,7 +78,7 @@ class AuthViewModel: ObservableObject {
             }
             // Username is unique, create Firebase Authentication user
             Auth.auth().createUser(withEmail: email, password: password) { result, error in
-                DispatchQueue.main.async { self.isLoading = false }
+               
                 if let error = error {
                     DispatchQueue.main.async {
                         self.errorMessage = "Sign-up failed: \(error.localizedDescription)"
@@ -235,13 +235,11 @@ class AuthViewModel: ObservableObject {
             let userDocRef = self.db.collection("users").document(user.uid)
 
             userDocRef.getDocument { snapshot, error in
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                }
-
-                if let error = error {
-                    print("Error fetching user doc: \(error.localizedDescription)")
-                    self.errorMessage = "Error fetching user profile"
+                if error != nil {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "Error fetching user profile"
+                        self.isLoading = false
+                    }
                     return
                 }
 
@@ -253,9 +251,10 @@ class AuthViewModel: ObservableObject {
                         self.fetchUserProfile()
                         self.fetchQuests()
                         self.checkOrGenerateDailyQuest()
+                        // isLoading will be set to false in fetchUserProfile
                     }
                 } else {
-                    // First time anonymous user — create profile
+                    // First-time anonymous user — create profile
                     userDocRef.setData([
                         "uid": user.uid,
                         "username": "Guest",
@@ -263,25 +262,30 @@ class AuthViewModel: ObservableObject {
                         "npcClass": NSNull(),
                         "xp": 0,
                         "level": 1,
-                        "needsOnboarding": true // ✅ Ensures onboarding UI triggers
+                        "needsOnboarding": true
                     ]) { error in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                print("Failed to create anonymous user doc: \(error.localizedDescription)")
+                        if error != nil {
+                            DispatchQueue.main.async {
                                 self.errorMessage = "Failed to initialize user profile"
+                                self.isLoading = false
                             }
+                            return
+                        }
 
+                        DispatchQueue.main.async {
                             self.userSession = user
                             self.isLoggedIn = true
                             self.fetchUserProfile()
                             self.fetchQuests()
                             self.checkOrGenerateDailyQuest()
+                            // isLoading will be set to false in fetchUserProfile
                         }
                     }
                 }
             }
         }
     }
+
 
     // MARK: - Mark quest as complete
     func completeQuest(questID: String) {
@@ -465,6 +469,8 @@ class AuthViewModel: ObservableObject {
 
                 self.isLoggedIn = true
                 self.finishedLoadingProfile = true
+                self.isLoading = false
+                self.checkOrGenerateDailyQuest()
 
 //                print("🧠 flavorText:", self.flavorText ?? "nil")
 //                print("🧠 characterClass:", self.characterClass ?? "nil")

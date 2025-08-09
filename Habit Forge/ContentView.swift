@@ -1,13 +1,20 @@
 import SwiftUI
-
 struct ContentView: View {
     @StateObject private var authViewModel = AuthViewModel()
-
+    
     @State private var showSignUpForm = false
     @State private var showLoginForm = false
     @State private var showMainContent = false
     @State private var showSplash = true
-
+    
+    private func themedImageName(_ baseName: String, flavorText: String?) -> String {
+        if (flavorText ?? "").lowercased().contains("sci") {
+            return "scifi_\(baseName)"
+        } else {
+            return baseName
+        }
+    }
+    
     var body: some View {
         ZStack {
             // Background
@@ -15,21 +22,22 @@ struct ContentView: View {
                 .resizable()
                 .interpolation(.none)
                 .ignoresSafeArea()
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
             if showSplash || authViewModel.isLoading {
                 SplashScreenView()
                     .zIndex(10)
             }
-
+            
             // Initial app splash screen
-//            if showSplash {
-//                SplashScreenView()
-//                    .zIndex(10)
-//            }
-
+            //            if showSplash {
+            //                SplashScreenView()
+            //                    .zIndex(10)
+            //            }
+            
             // Main content
             currentMainView()
                 .padding()
-
+            
             // Error message banner
             if let error = authViewModel.errorMessage {
                 Text(error)
@@ -42,6 +50,7 @@ struct ContentView: View {
                     .zIndex(20)
             }
         }
+        .environment(\.font, .custom("ThaleahFat", size: 26))
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 if !authViewModel.isLoading {
@@ -54,6 +63,7 @@ struct ContentView: View {
         }
         .onChange(of: authViewModel.userSession) { _, newValue in
             if newValue == nil {
+                showSplash = false
                 showLoginForm = false
                 showSignUpForm = false
             } else {
@@ -61,22 +71,27 @@ struct ContentView: View {
             }
         }
         .onChange(of: authViewModel.finishedLoadingProfile) { _, finished in
-                    if finished && authViewModel.isLoggedIn {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            withAnimation {
-                                showSplash = false
-                                showMainContent = true
-                            }
+            if finished && authViewModel.isLoggedIn {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    withAnimation {
+                        showSplash = false
+                        showMainContent = true
+                    }
                 }
             }
         }
         .onChange(of: authViewModel.isLoading) { _, loading in
             if loading {
                 showSplash = true
+            }else if authViewModel.userSession == nil {
+                withAnimation {
+                    showSplash = false
+                    
+                }
             }
         }
     }
-
+    
     // MARK: - View Builder for current main view state
     @ViewBuilder
     private func currentMainView() -> some View {
@@ -94,38 +109,69 @@ struct ContentView: View {
                             .scaledToFill()
                             .ignoresSafeArea()
                             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-
+                        
                         FlavorSelectionView()
                             .environmentObject(authViewModel)
                     }
                 } else if authViewModel.characterClass == nil {
                     ZStack {
-                
-                            Image("long-background")
-                                .resizable()
-                                .interpolation(.none)
-                                .scaledToFill()
-                                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
-                                .ignoresSafeArea()
+                        
+                        Image("long-background")
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFill()
+                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                            .ignoresSafeArea()
                         
                         ClassSelectionView()
                             .environmentObject(authViewModel)
                     }
                 } else {
-                    QuestBoardView(authViewModel: authViewModel)
+                    
+                    questBoardWithBackground()
                 }
             } else {
-                QuestBoardView(authViewModel: authViewModel)
+                questBoardWithBackground()
             }
         }
     }
+    
+    @ViewBuilder
+    private func questBoardWithBackground() -> some View {
+        ZStack {
+            Image(themedImageName("wood_board", flavorText: authViewModel.flavorText))
+                .resizable()
+                .interpolation(.none)
+                .scaledToFill()
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+                .ignoresSafeArea()
 
+            QuestBoardView(authViewModel: authViewModel)
+        }
+    }
+    
     // MARK: - Login / Signup form
+    
+    
     private func loginSignupForm() -> some View {
         ZStack {
             VStack {
-                Spacer(minLength: 500)
-
+//                Spacer(minLength: 80)
+                
+                // === APP LOGO ===
+                if !showLoginForm && !showSignUpForm {
+                    Image("logo_habit_forge")
+                        .resizable()
+                        .interpolation(.none)
+                        .frame(width: 300, height: 200)
+                        .offset(y:160)
+                        
+                    
+                        .transition(.opacity)
+                }
+                
+                Spacer(minLength: 380)
+                
                 if !showLoginForm && !showSignUpForm {
                     VStack(spacing: -20) {
                         Button(action: {
@@ -147,7 +193,7 @@ struct ContentView: View {
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
-
+                        
                         Button(action: {
                             withAnimation {
                                 showLoginForm = true
@@ -167,7 +213,7 @@ struct ContentView: View {
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
-
+                        
                         Button(action: {
                             authViewModel.signInAnonymously()
                         }) {
@@ -179,12 +225,12 @@ struct ContentView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                     }
-                    .padding(.top, 80)
+                    .padding(.top, 20)
                 }
-
+                
                 Spacer()
             }
-
+            
             if showLoginForm {
                 LoginView(onCancel: {
                     withAnimation {
@@ -195,7 +241,7 @@ struct ContentView: View {
                 .environmentObject(authViewModel)
                 .zIndex(5)
             }
-
+            
             if showSignUpForm {
                 SignUpView(
                     onCancel: {

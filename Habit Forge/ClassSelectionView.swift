@@ -29,41 +29,51 @@ struct ClassSelectionView: View {
     ]
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                VStack(spacing: 20) {
-                    Image("choose_a_class")
-                        .resizable()
-                        .interpolation(.none)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 300, height: 80)
-
-                    let classes = (authViewModel.flavorText == "sci-fi") ? sciFiClasses : fantasyClasses
-
-                    ForEach(classes, id: \.self) { npcClass in
-                        VStack(spacing: 10) {
-                            Text(npcClass)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.purple.opacity(0.85))
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-
-                            Button("Confirm Class") {
-                                authViewModel.updateUserProfile(field: "npcClass", value: npcClass) {
-                                    DispatchQueue.main.async {
-                                        authViewModel.needsOnboarding = false
-                                        onClassSelected() // ✅ Trigger splash from ContentView
+            GeometryReader { geometry in
+                ZStack {
+                    VStack(spacing: 20) {
+                        Image("choose_a_class")
+                            .resizable()
+                            .interpolation(.none)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 300, height: 80)
+                        
+                        let classes = (authViewModel.flavorText == "sci-fi") ? sciFiClasses : fantasyClasses
+                        let buttonImage = authViewModel.flavorText == "sci-fi" ? "scifi_class_button" : "fantasy_class_button"
+                        
+                        ScrollView {
+                            VStack(spacing: 40) {
+                                ForEach(classes, id: \.self) { npcClass in
+                                    Button(action: {
+                                        authViewModel.updateUserProfile(field: "npcClass", value: npcClass) {
+                                            DispatchQueue.main.async {
+                                                authViewModel.needsOnboarding = false
+                                                onClassSelected()
+                                            }
+                                        }
+                                    }) {
+                                        ZStack {
+                                            Image(buttonImage)
+                                                .resizable()
+                                                .interpolation(.none)
+                                                .scaledToFit()
+                                                .frame(height: 50)
+                                            
+                                            Text(npcClass)
+                                                .foregroundColor(.white)
+                                               
+                                        }
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
-                            .buttonStyle(.borderedProminent)
+                            .padding(.horizontal)
                         }
-                        .padding(.vertical, 6)
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal)
+                    .padding(.top, 10)
                 }
-                .padding()
             }
         }
     }
-}

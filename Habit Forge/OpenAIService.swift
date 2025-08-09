@@ -9,7 +9,7 @@ import Foundation
 
 class OpenAIService {
     static let shared = OpenAIService()
-    private let apiKey = OPENAI_API_KEY
+    private let apiKey = Secrets.OPENAI_API_KEY
     
     func generateDailyQuest(
         flavor: String,
@@ -21,7 +21,17 @@ class OpenAIService {
         
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let prompt = """
-        Write a single creative, positive, whimsical productivity quest for today for a \(normalizedClass) in a \(normalizedFlavor) style. Make it unique, doable in one day, and encouraging. Only return the quest, not a title or explanation.
+        Write aproductivity task as a quest in a \(normalizedFlavor) style for a \(normalizedClass) character. Make it funny, creative, and only 1 to 2 sentences long.
+        
+        **Format exactly like this:**
+        [Short quest title that ends with either a period (.), exclamation mark (!), or colon (:)]
+        Description: [One to two whimsical, playful sentences encouraging action.]
+
+        **Important:**
+        - The quest title MUST end in a period, exclamation mark, or colon.
+        - Do NOT use quotation marks around the title or description.
+        - The description should be a full sentence, but do not repeat the title in it.
+
         """
         let body: [String: Any] = [
             "model": "gpt-3.5-turbo",
@@ -29,7 +39,7 @@ class OpenAIService {
                 ["role": "system", "content": "You are a creative quest designer for a productivity RPG app."],
                 ["role": "user", "content": prompt]
             ],
-            "max_tokens": 120,
+            "max_tokens": 70,
             "temperature": 0.9
         ]
         var request = URLRequest(url: url)
@@ -80,7 +90,18 @@ class OpenAIService {
         
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         let prompt = """
-        Rewrite the following productivity task as a quest in a \(normalizedFlavor) style for a \(userClass) character. Make it funny and creative. Task: "\(task)"
+        Rewrite the following productivity task as a quest in a \(normalizedFlavor) style for a \(userClass) character. Make it funny, creative, and only 1 to 2 sentences long.
+
+        **Format exactly like this:**
+        [Short quest title that ends with either a period (.), exclamation mark (!), or colon (:)]
+        Description: [One to two whimsical, playful sentences encouraging action.]
+
+        **Important:**
+        - The quest title MUST end in a period, exclamation mark, or colon.
+        - Do NOT use quotation marks around the title or description.
+        - The description should be a full sentence, but do not repeat the title in it.
+
+        Task: "\(task)"
         """
         let body: [String: Any] = [
             "model": "gpt-3.5-turbo",
@@ -88,7 +109,7 @@ class OpenAIService {
                 ["role": "system", "content": "You are a creative quest designer for a productivity RPG app."],
                 ["role": "user", "content": prompt]
             ],
-            "max_tokens": 120,
+            "max_tokens": 50,
             "temperature": 0.9
         ]
         var request = URLRequest(url: url)
