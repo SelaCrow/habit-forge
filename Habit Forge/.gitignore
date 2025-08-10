@@ -9,12 +9,12 @@ DerivedData/
 
 # Firebase
 GoogleService-Info.plist
-
+Habit Forge/Secrets.swift
 
 # CocoaPods
 Pods/
 Podfile.lock
-
+Habit Forge/Secrets.swift
 Secrets.xcconfig
 Secrets.swift
 Secrets.xcconfig
