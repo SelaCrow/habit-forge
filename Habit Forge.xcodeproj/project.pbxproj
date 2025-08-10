@@ -11,7 +11,6 @@
 		C369006D2E2F0DA500BEFDDB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = C369006C2E2F0DA500BEFDDB /* FirebaseCore */; };
 		C369006F2E2F0DA500BEFDDB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C369006E2E2F0DA500BEFDDB /* FirebaseFirestore */; };
 		C36900712E2F0DA500BEFDDB /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = C36900702E2F0DA500BEFDDB /* FirebaseStorage */; };
-		C3A70AFB2E36ED0600164A6E /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,12 +34,24 @@
 		C369003A2E2F0A5300BEFDDB /* Habit Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Habit Forge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C369004A2E2F0A5400BEFDDB /* Habit ForgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Habit ForgeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C36900542E2F0A5400BEFDDB /* Habit ForgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Habit ForgeUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C33FD5192E48382100311FBA /* Exceptions for "Habit Forge" folder in "Habit Forge" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Habit-Forge-Info.plist",
+			);
+			target = C36900392E2F0A5300BEFDDB /* Habit Forge */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C369003C2E2F0A5300BEFDDB /* Habit Forge */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C33FD5192E48382100311FBA /* Exceptions for "Habit Forge" folder in "Habit Forge" target */,
+			);
 			path = "Habit Forge";
 			sourceTree = "<group>";
 		};
@@ -88,7 +99,6 @@
 		C36900312E2F0A5300BEFDDB = {
 			isa = PBXGroup;
 			children = (
-				C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */,
 				C369003C2E2F0A5300BEFDDB /* Habit Forge */,
 				C369004D2E2F0A5400BEFDDB /* Habit ForgeTests */,
 				C36900572E2F0A5400BEFDDB /* Habit ForgeUITests */,
@@ -233,7 +243,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3A70AFB2E36ED0600164A6E /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,7 +302,6 @@
 /* Begin XCBuildConfiguration section */
 		C369005C2E2F0A5400BEFDDB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C3A70AFA2E36ED0600164A6E /* Secrets.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -423,6 +431,7 @@
 				DEVELOPMENT_TEAM = X49WPG597Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Habit-Forge-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -453,6 +462,7 @@
 				DEVELOPMENT_TEAM = X49WPG597Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Habit-Forge-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
